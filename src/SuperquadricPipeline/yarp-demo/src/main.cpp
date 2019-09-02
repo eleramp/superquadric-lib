@@ -1330,7 +1330,11 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
         // send robot to home position and return
         if(go_home)
+	{
             success = this->home();
+	    success = this->open_hand(best_hand);
+	}
+	
 
         return true;
     }
@@ -2413,17 +2417,21 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
             yInfo() << "executeGrasp: command " << command.toString();
             action_render_rpc.write(command, reply);
+	    bool success = false;
             if (reply.get(0).asVocab() == Vocab::encode("ack"))
             {
 
-                return true;
+                success = true;
             }
             else
             {
 
-                return false;
+                success = false;
 
             }
+
+	    success = this->take_tool(true);
+	    return success;
         }
     }
 

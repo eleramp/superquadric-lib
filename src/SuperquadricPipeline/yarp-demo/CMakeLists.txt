@@ -63,8 +63,8 @@ target_link_libraries(${EXE_TARGET_NAME}
 install(TARGETS ${EXE_TARGET_NAME} DESTINATION bin)
 
 #icubcontrib_add_uninstall_target()
-file(GLOB scripts ${CMAKE_SOURCE_DIR}/app/scripts/*.template)
-yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL_DIR})
+file(GLOB scripts app/scripts/*.xml)
+yarp_install(FILES ${scripts} DESTINATION /usr/local/src/robot/robotology-superbuild/build/install/share/ICUBcontrib/applications/)
 
 file(GLOB ini app/conf/*.ini)
 yarp_install(FILES ${ini} DESTINATION ${ICUBCONTRIB_CONTEXTS_INSTALL_DIR}/${EXE_TARGET_NAME})
