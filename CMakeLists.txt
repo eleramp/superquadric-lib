@@ -147,6 +147,7 @@ endif()
 include(AddInstallRPATHSupport)
 add_install_rpath_support(BIN_DIRS "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
                           LIB_DIRS "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+                                   "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/superquadriclib/bindings"
                           INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}"
                           USE_LINK_PATH)
 
@@ -200,6 +201,11 @@ include(AddUninstallTarget)
 if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
+
+option(ENABLE_BINDINGS "Enable swig bindings" ON)
+    if(ENABLE_BINDINGS)
+        add_subdirectory(bindings)
+    endif()
 
 # Add targets related to doxygen documention generation
 add_subdirectory(doc)
