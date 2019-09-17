@@ -61,7 +61,7 @@ public:
     /* Hand of the grasping pose */
     std::string hand;
 
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /**
     * Constructor

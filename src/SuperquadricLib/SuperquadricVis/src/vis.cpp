@@ -41,7 +41,8 @@ void UpdateCommand::set_closing(const bool &closing)
 void UpdateCommand::Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId),
              void *vtkNotUsed(callData))
 {
-    mtx.lock();
+    std::unique_lock<std::mutex> lck (Mutex.mtx);
+    //mtx.lock();
 
     vtkRenderWindowInteractor* iren=static_cast<vtkRenderWindowInteractor*>(caller);
     if (closing!=nullptr)
@@ -56,7 +57,7 @@ void UpdateCommand::Execute(vtkObject *caller, unsigned long vtkNotUsed(eventId)
 
     //iren->GetRenderWindow()->SetWindowName("Superquadric visualizer");
     iren->Render();
-    mtx.unlock();
+    //mtx.unlock();
 }
 
 /**********************************************/
