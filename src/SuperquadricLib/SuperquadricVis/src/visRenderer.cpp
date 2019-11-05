@@ -405,6 +405,12 @@ void Visualizer::visualize()
 }
 
 /**********************************************/
+void Visualizer::render()
+{
+    vtk_renderWindowInteractor->Render();
+}
+
+/**********************************************/
 void Visualizer::saveScreenshot(const string &object, const int &number)
 {
     vtk_renderWindowInteractor->Render();
