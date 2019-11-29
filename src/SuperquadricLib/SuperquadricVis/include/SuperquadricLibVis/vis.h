@@ -35,22 +35,7 @@
 
 namespace SuperqVis {
 
-struct myMutex{
-
-    mutable std::mutex mtx;
-    myMutex& operator=(const myMutex& o)
-    {
-        if (this != &o)
-        {
-            std::lock(mtx, o.mtx);
-            std::lock_guard<std::mutex> lhs_lk(mtx, std::adopt_lock);
-            std::lock_guard<std::mutex> rhs_lk(o.mtx, std::adopt_lock);
-        }
-        return *this;
-    }
-};
-
-static myMutex Mutex;
+static std::mutex mtx;
 
 class UpdateCommand : public vtkCommand
 {

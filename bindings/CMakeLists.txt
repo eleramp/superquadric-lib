@@ -5,10 +5,6 @@
 set(Python_ADDITIONAL_VERSIONS "3.6" CACHE STRING "Python to use for binding")
 find_package(PythonLibs REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(VTK REQUIRED COMPONENTS vtksys vtkRenderingCore NO_MODULE)
-if(VTK_FOUND)
-	message(" --- VTK found ${VTK_DIR}")
-endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -22,11 +18,7 @@ endif()
 
 find_package(SWIG REQUIRED)
 set(UseSWIG_MODULE_VERSION 2)
-
 include(${SWIG_USE_FILE})
-
-include(${VTK_USE_FILE})
-
 #SWIG_EXPORT_ITERATOR_METHODS
 SET(CMAKE_SWIG_FLAGS "")
 
@@ -45,27 +37,17 @@ swig_add_library(${swig_name}
     SOURCES ${swig_name}.i)
 
 set_property(SOURCE ${swig_name}.i APPEND PROPERTY SWIG_FLAGS "-py3" "-DSWIGPYTHON3")
-
 set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-modern")
 
 target_link_libraries(${swig_name} PUBLIC
 	SuperquadricLibModel
-	SuperquadricLibGrasp
-	SuperquadricLibVis
-	${VTK_LIBRARIES}
     ${PYTHON_LIBRARIES})
 
 set_property(TARGET ${swig_name} PROPERTY
     SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
 
-target_include_directories(${swig_name} PRIVATE ${VTK_INCLUDE_DIRS})
-target_include_directories(${swig_name} PRIVATE ${PYTHON_INCLUDE_PATH})
-if(NOT TARGET Eigen3)
-    target_include_directories(${swig_name} PUBLIC ${EIGEN3_INCLUDE_DIR})
-	target_link_libraries(${swig_name} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-else()
-    target_link_libraries(${swig_name} PUBLIC Eigen3::Eigen)
-endif()
+target_include_directories(${swig_name} PRIVATE
+    ${PYTHON_INCLUDE_PATH})
 
 install(
     TARGETS ${swig_name}

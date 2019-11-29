@@ -144,7 +144,7 @@ void Visualizer::addPoints(PointCloud point_cloud, const bool &show_downsample)
     vector<vector<unsigned char>> all_colors = point_cloud.colors;
 
     size_points = 4;
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
+    mtx.lock();
     vtk_all_points->set_points(all_points);
     vtk_all_points->set_colors(all_colors);
 
@@ -165,7 +165,7 @@ void Visualizer::addPoints(PointCloud point_cloud, const bool &show_downsample)
     vtk_camera->SetPosition(centroid[0] + 0.5,centroid[1],centroid[2] + 0.4);
     vtk_camera->SetFocalPoint(centroid.data());
     vtk_camera->SetViewUp(0.0,0.0,1.0);
-    // mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
@@ -173,17 +173,17 @@ void Visualizer::addPointsHands(PointCloud point_cloud)
 {
     vector<Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> all_points = point_cloud.points_for_vis;
 
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
+    mtx.lock();
     vtk_hand_points->set_points(all_points);
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
 void Visualizer::addPlane(const double &z)
 {
-    std::unique_lock<std::mutex> lck (Mutex.mtx);//mtx.lock();
+    mtx.lock();
     vtk_plane->setHeight(-z);
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
@@ -191,7 +191,7 @@ void Visualizer::addSuperq(vector<SuperqModel::Superquadric> &s)
 {
     Vector12d r;
 
-    std::unique_lock<std::mutex> lck (Mutex.mtx);//mtx.lock();
+    mtx.lock();
 
     for (size_t i = 0; i < s.size(); i++)
     {
@@ -221,7 +221,7 @@ void Visualizer::addSuperq(vector<SuperqModel::Superquadric> &s)
     vtk_camera->SetFocalPoint(center.data());
     vtk_camera->SetViewUp(0.0,0.0,1.0);
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
@@ -229,8 +229,7 @@ void Visualizer::addSuperqHands(vector<SuperqModel::Superquadric> &s)
 {
     Vector12d r;
 
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
 
     for (size_t i = 0; i < s.size(); i++)
     {
@@ -242,15 +241,14 @@ void Visualizer::addSuperqHands(vector<SuperqModel::Superquadric> &s)
         vtk_hand_superquadrics[i]->set_parameters(r);
     }
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 
 /**********************************************/
 void Visualizer::resetSuperq()
 {
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
 
     for (size_t i = 0; i < vtk_superquadrics.size(); i++)
     {
@@ -268,32 +266,30 @@ void Visualizer::resetSuperq()
         vtk_hand_superquadrics[i]->set_parameters(r);
     }
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
 void Visualizer::addPoses(vector<GraspPoses> &poses1)
 {
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
 
     num_poses = poses1.size();
     addPosesAux(0, poses1);
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
 void Visualizer::addPoses(vector<GraspPoses> &poses1, vector<GraspPoses> &poses2)
 {
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
 
     num_poses = poses1.size() + poses2.size();
     addPosesAux(0, poses1);
     addPosesAux(poses1.size(), poses2);
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
@@ -371,8 +367,7 @@ void Visualizer::highlightBestPose(const string &hand, const string &both_or_not
 /**********************************************/
 void Visualizer::resetPoses()
 {
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
 
     for (size_t i = 0; i < pose_candidates.size(); i++)
     {
@@ -382,7 +377,7 @@ void Visualizer::resetPoses()
 
     num_poses = 0;
 
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
@@ -390,12 +385,11 @@ void Visualizer::resetPoints()
 {
     vector<Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> all_points;
 
-    std::unique_lock<std::mutex> lck (Mutex.mtx);
-    //mtx.lock();
+    mtx.lock();
     vtk_all_points->set_points(all_points);
     vtk_dwn_points->set_points(all_points);
     vtk_hand_points->set_points(all_points);
-    //mtx.unlock();
+    mtx.unlock();
 }
 
 /**********************************************/
