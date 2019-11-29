@@ -101,8 +101,6 @@ public:
     */
     void visualize();
 
-    void render();
-
     /**
     * Save a screenshot without visualization
     * @param name is the string that is add in the file name
