@@ -176,6 +176,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     map<string,PointD> get_best_grasp_position();
     bool choose_pose(const string &hand, int pose_idx);
     bool calibratePose();
+    bool save_pcloud(const string &base_dir, const string &obj_name);
 
     // action methods
     bool look_at(const PointD &point);
@@ -188,7 +189,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     bool drop();
     bool home();
     bool quit();
-    bool save_pcloud(const string &base_dir, const string &obj_name);
+    bool step_demo(const string &hand, const bool calibrate = true);
+
 
     /* class methods */
     bool requestPointCloud(const string &object, const Vector &position = Vector());
@@ -974,6 +976,51 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     }
 
     /****************************************************************/
+    bool SuperquadricPipelineDemo::step_demo(const string &hand, const bool calibrate)
+    {
+        bool ok = false;
+
+        // 1 - make the robot looking at the object (hanging tool)
+        PointD p;
+        p.x = -0.4; p.y = 0.0; p.z = 0.17;
+        ok = this->look_at(p);
+
+        if (!ok)
+        {
+            yInfo() << "step_demo: could not look at the point";
+            return false;
+        }
+
+        // 2 - Compute the superquadric and grasping pose
+        ok = this->compute_superq_and_pose("hanging_tool", hand);
+
+        if (!ok || grasp_res_hand1.grasp_poses.size()==0)
+        {
+            yInfo() << "step_demo: could not compute superq or pose";
+            return false;
+        }
+
+        // 2bis - Calibrate pose
+        if (calibrate)
+        {
+            ok = this->calibratePose();
+        }
+
+        if (!ok)
+        {
+            yInfo() << "step_demo: could not calibrate the pose";
+            return false;
+        }
+
+        // 3 - grasp the object and execute trajectory
+
+        this->grasp();
+
+        return true;
+
+    }
+
+    /****************************************************************/
     bool SuperquadricPipelineDemo::look_at(const PointD &point)
     {
         if (action_render_rpc.getOutputCount() > 0)
@@ -1105,13 +1152,14 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             object_class = object_name;
 
         // Compute sq model and grasping pose
-        if (ok == true && point_cloud.getNumberPoints() >= sq_model_params["minimum_points"])
+        if (ok && point_cloud.getNumberPoints() >= sq_model_params["minimum_points"])
         {
             yInfo() << "compute_superq_and_pose: point cloud is ok --> call computeSuperqAndGrasp()";
             computeSuperqAndGrasp();
+            return true;
         }
 
-        return ok;
+        return false;
     }
 
     /****************************************************************/
@@ -1200,7 +1248,11 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << endl << endl;
 
-        return executeGrasp(best_pose, best_hand);
+        bool success = executeGrasp(best_pose, best_hand);
+
+        success = this->take_tool(true);
+
+        return success;
     }
 
     /****************************************************************/
@@ -1213,6 +1265,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         }
 
         GraspPoses best_graspPose, calib_pose;
+        bool ok = false;
 
         if (grasping_hand == WhichHand::BOTH && best_hand == "left")
         {
@@ -1221,20 +1274,24 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             calib_pose = best_graspPose;
             yInfo() << "[calibratePose]: calibrate pose";
 
-            fixReachingOffset(best_graspPose, calib_pose);
+            ok = fixReachingOffset(best_graspPose, calib_pose);
+            if (!ok)
+                return false;
 
-	    grasp_res_hand2.grasp_poses[grasp_res_hand2.best_pose] = calib_pose;
+            grasp_res_hand2.grasp_poses[grasp_res_hand2.best_pose] = calib_pose;
         }
-	else
-	{
-	    best_graspPose = grasp_res_hand1.grasp_poses[grasp_res_hand1.best_pose];
-	    calib_pose = best_graspPose;
+        else
+        {
+            best_graspPose = grasp_res_hand1.grasp_poses[grasp_res_hand1.best_pose];
+            calib_pose = best_graspPose;
             yInfo() << "[calibratePose]: calibrate pose";
 
-            fixReachingOffset(best_graspPose, calib_pose);
+            ok = fixReachingOffset(best_graspPose, calib_pose);
+            if (!ok)
+                return false;
 
-	    grasp_res_hand1.grasp_poses[grasp_res_hand1.best_pose] = calib_pose;
-	}
+            grasp_res_hand1.grasp_poses[grasp_res_hand1.best_pose] = calib_pose;
+        }
 
         return true;
     }
@@ -1242,11 +1299,6 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     /****************************************************************/
     bool SuperquadricPipelineDemo::take_tool(bool go_home)
     {
-        // First make the robot looking up
-        PointD p;
-        p.x = -0.4; p.y = 0.0; p.z = 0.15;
-        this->look_at(p);
-
         // Execute trajectory
         bool success = false;
         Vector grasping_current_pos(3), grasping_current_o(4);
@@ -1330,11 +1382,10 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
         // send robot to home position and return
         if(go_home)
-	{
+        {
             success = this->home();
-	    success = this->open_hand(best_hand);
-	}
-	
+            success = this->open_hand(best_hand);
+        }
 
         return true;
     }
@@ -1699,9 +1750,12 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 	if(acquired_points.size() >= sq_model_params["minimum_points"])
 	{
             deque<Eigen::Vector3d> eigen_points = vectorYarptoEigen(acquired_points);
+            cout << "point_cloud.setPoints" << endl;
             point_cloud.setPoints(eigen_points);
+            cout << "point_cloud.setColors" << endl;
             point_cloud.setColors(acquired_colors);
             // Visualize acquired point cloud
+            cout << "vis.addPoints" << endl;
             vis.addPoints(point_cloud, false);
 
             return true;
@@ -1809,12 +1863,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         cout << "|| Outliers removed                                      : "<< pc.size() - in_points.size() << endl;
         cout << "|| ---------------------------------------------------- ||" << endl<<endl;
 
-	pc.clear();
-
-	if (!all_colors.empty())
-	{
-            all_colors.clear();
-	}
+        pc.clear();
+        all_colors.clear();
 
         pc = in_points;
         all_colors = in_colors;
@@ -1838,12 +1888,12 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         {
             estim.SetStringValue("object_class", object_class);
             superqs = estim.computeSuperq(point_cloud);
-            vis.addPoints(point_cloud, false);
+            //vis.addPoints(point_cloud, false);
         }
         else
         {
             superqs = estim.computeMultipleSuperq(point_cloud);
-            vis.addPoints(point_cloud, false);
+            //vis.addPoints(point_cloud, false);
         }
 
         // Visualize downsampled point cloud and estimated superq
@@ -2308,8 +2358,6 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     /****************************************************************/
     bool SuperquadricPipelineDemo::executeGrasp(Vector &pose, string &best_hand)
     {
-
-
         if(robot == "icubSim")
         {
             //  simulation context, suppose there is no actionsRenderingEngine running
@@ -2424,7 +2472,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
             yInfo() << "executeGrasp: command " << command.toString();
             action_render_rpc.write(command, reply);
-	    bool success = false;
+
+            bool success = false;
             if (reply.get(0).asVocab() == Vocab::encode("ack"))
             {
 
@@ -2437,7 +2486,6 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
             }
 
-	    success = this->take_tool(true);
 	    return success;
         }
     }

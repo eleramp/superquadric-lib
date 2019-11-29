@@ -71,6 +71,8 @@ struct PointD {
 
      bool quit();
 
+     bool step_demo(1: string hand, 2: bool calibrate = false);
+
      string get_superq_mode();
 
      bool set_single_superq(1: bool value);
