@@ -1244,7 +1244,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     {
         // First make the robot looking up
         PointD p;
-        p.x = -0.4; p.y = 0.0; p.z = 0.1;
+        p.x = -0.4; p.y = 0.0; p.z = 0.15;
         this->look_at(p);
 
         // Execute trajectory
@@ -1431,7 +1431,12 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             return true;
         }
 
-        else if (action_render_rpc.getOutputCount() > 0)
+	// First make the robot looking up
+        PointD p;
+        p.x = -0.4; p.y = 0.0; p.z = 0.15;
+        this->look_at(p);
+
+        if (action_render_rpc.getOutputCount() > 0)
         {
             Bottle cmd, reply;
 
@@ -1665,7 +1670,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
             if (norm(point) == 0.0 || (point[0] > -0.2) || (point[0] < -0.6) || (point[2] < -0.2))
             {
-                yInfo() << "   skipping point: null norm or out of range " << point.toString();
+                //yInfo() << "   skipping point: null norm or out of range " << point.toString();
                 continue;
             }
 
@@ -1691,10 +1696,9 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         filterPC(acquired_points, acquired_colors);
         removeOutliers(acquired_points, acquired_colors);
 
-        deque<Eigen::Vector3d> eigen_points = vectorYarptoEigen(acquired_points);
-
-        if (eigen_points.size() >= sq_model_params["minimum_points"])
-        {
+	if(acquired_points.size() >= sq_model_params["minimum_points"])
+	{
+            deque<Eigen::Vector3d> eigen_points = vectorYarptoEigen(acquired_points);
             point_cloud.setPoints(eigen_points);
             point_cloud.setColors(acquired_colors);
             // Visualize acquired point cloud
@@ -1727,7 +1731,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             if (pc[i][0] > x_max)
                 x_max = pc[i][0];
         }
-
+	x_max = x_max + 0.05;
         yDebug() << "X max: " << x_max;
         yDebug() << "x_max - " << pc_filter_params["sfm_range"] << ":" << x_max - pc_filter_params["sfm_range"];
 
@@ -1805,9 +1809,12 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         cout << "|| Outliers removed                                      : "<< pc.size() - in_points.size() << endl;
         cout << "|| ---------------------------------------------------- ||" << endl<<endl;
 
+	pc.clear();
 
-        pc.clear();
-        all_colors.clear();
+	if (!all_colors.empty())
+	{
+            all_colors.clear();
+	}
 
         pc = in_points;
         all_colors = in_colors;
@@ -2221,7 +2228,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             }
 
             Eigen::VectorXd pose_hat = toEigen(x_d_hat);
-            Eigen::VectorXd or_hat = toEigen(o_d_hat);
+            Eigen::Vector4d or_hat = Eigen::Vector4d(0,-0.7071068, 0.7071068, 3.14);//toEigen(o_d_hat);
 
             Eigen::VectorXd robot_pose;
             robot_pose.resize(7);

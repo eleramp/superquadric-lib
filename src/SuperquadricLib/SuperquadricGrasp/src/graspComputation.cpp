@@ -649,8 +649,10 @@ void graspComputation::finalize_solution(Ipopt::SolverReturn status, Ipopt::Inde
     final_obstacles_value = computeFinalObstacleValues(robot_pose);
 
     // Change
+    //double w1 = 0.01;
+    //double w2 = 1e-5;
     double w1 = 0.01;
-    double w2 = 1e-5;
+    double w2 = 4;
     double final_obstacles_value_average = 0.0;
 
     if (num_superq > 0.0)
@@ -1044,56 +1046,69 @@ void GraspEstimatorApp::refinePoseCost(GraspResults &grasp_res)
 
           // Desired orientation
           Vector3d x_ea_d = poses_computed[i].getGraspEulerZYZ();
-          Matrix3d R_d;
-          R_d = AngleAxisd(x_ea_d(0), Vector3d::UnitZ())*
-                AngleAxisd(x_ea_d(0), Vector3d::UnitZ())*
-                AngleAxisd(x_ea_d(0), Vector3d::UnitZ());
+          Vector3d V_d; Matrix3d R_d; AngleAxisd ax_d;
+          ax_d = AngleAxisd(x_ea_d(0), Vector3d::UnitZ())*
+                AngleAxisd(x_ea_d(1), Vector3d::UnitY())*
+                AngleAxisd(x_ea_d(2), Vector3d::UnitZ());
+
+	  R_d = ax_d.toRotationMatrix();
+	  V_d = R_d.block<3,1>(0,1); // consider only y-axis orientation
 
           // Position reachable by the robot
           Vector3d x_hat = pose_hat.head(3);
 
           // Orientation reachable by the robot
-          Matrix3d R_hat;
+          Vector3d V_hat; Matrix3d R_hat; AngleAxisd ax_hat;
 
           if (pose_hat.size() == 6)
           {
               Vector3d x_ea_hat = pose_hat.tail(3);
-              R_hat = AngleAxisd(x_ea_hat(0), Vector3d::UnitZ())*
-                      AngleAxisd(x_ea_hat(1), Vector3d::UnitZ())*
+              ax_hat = AngleAxisd(x_ea_hat(0), Vector3d::UnitZ())*
+                      AngleAxisd(x_ea_hat(1), Vector3d::UnitY())*
                       AngleAxisd(x_ea_hat(2), Vector3d::UnitZ());
           }
 
           else if (pose_hat.size() == 7)
           {
-              Vector4d axisangle = x_hat.tail(4);
-              R_hat = AngleAxisd(axisangle(3), axisangle.head(3));
+              Vector4d axisangle = pose_hat.tail(4);
+              ax_hat = AngleAxisd(axisangle(3), axisangle.head(3));
           }
+
+ 	  R_hat = ax_hat.toRotationMatrix();
+	  V_hat = R_hat.block<3,1>(0,1);
 
           double error_position  = (x_d - x_hat).norm();
 
 	  cout << " error position " << error_position << endl;
 
-          R_hat.transposeInPlace();
+	  double error_orientation = 1 / (V_hat.dot(V_d));
 
-          Matrix3d orientation_error_matrix =  R_d * R_hat;
-          AngleAxisd orientation_error_vector(orientation_error_matrix);
+          // R_hat.transposeInPlace();
 
-          double error_orientation = (orientation_error_vector.axis()).norm() * fabs(sin(orientation_error_vector.angle()));
+          // Matrix3d orientation_error_matrix =  R_d * R_hat;
+          // AngleAxisd orientation_error_vector(orientation_error_matrix);
+
+          // double error_orientation = (orientation_error_vector.axis()).norm() * fabs(sin(orientation_error_vector.angle()));
 
 	  cout << " error orientation " << error_orientation << endl;
 
-          double w1 = 1;
+          double w1 = 2;
           //double w2 = 0.01;
           double w2 = 2;
-
-          if (error_position > 0.01)
+		
+	  if (error_position > 0.01)
           {
               w2 = 0.01;
               w1 = 10;
           }
 
-          if (error_orientation < 0.01)
-              w2 = 0.0;
+	  if (x_d(2) < 0.2)
+	  {
+	      w1 = 0.0;
+	  }
+
+          //if (error_orientation < 1.2)
+          //    w2 = 0.0;
 
           poses_computed[i].cost += w1 * error_position + w2 * error_orientation;
         }
