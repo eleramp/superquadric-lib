@@ -209,7 +209,7 @@ protected:
                            Ipopt::Number obj_value, const Ipopt::IpoptData *ip_data,
                            Ipopt::IpoptCalculatedQuantities *ip_cq);
 public:
-    //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     SuperqModel::Superquadric solution;
     SuperqModel::PointCloud points_downsampled;
