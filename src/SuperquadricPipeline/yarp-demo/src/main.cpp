@@ -980,37 +980,66 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     {
         bool ok = false;
 
-        // 1 - make the robot looking at the object (hanging tool)
-        PointD p;
-        p.x = -0.4; p.y = 0.0; p.z = 0.17;
-        ok = this->look_at(p);
-
-        if (!ok)
+        if(robot == "icubSim")
         {
-            yInfo() << "step_demo: could not look at the point";
-            return false;
+            string pc;
+            cout << "Write path file with pointcloud: "; // Type a number and press enter
+            cin >> pc;
+            ok = this->from_off_file(pc, hand);
+
+            if (!ok)
+            {
+                yInfo() << "step_demo: could not look compute superq/pose";
+                return false;
+            }
+        }
+        else
+        {
+            // 1 - make the robot looking at the object (hanging tool)
+            PointD p;
+            p.x = -0.4; p.y = 0.0; p.z = 0.17;
+            ok = this->look_at(p);
+
+            if (!ok)
+            {
+                yInfo() << "step_demo: could not look at the point";
+                return false;
+            }
+
+            bool compute_pose = true;
+
+            while (compute_pose)
+            {
+
+            // 2 - Compute the superquadric and grasping pose
+            ok = this->compute_superq_and_pose("hanging_tool", hand);
+
+            if (!ok || grasp_res_hand1.grasp_poses.size()==0)
+            {
+                yInfo() << "step_demo: could not compute superq or pose";
+                return false;
+            }
+            int flag;
+            cout << "computed pose is ok? ";
+            cin >> flag;
+            if (flag)
+                compute_pose = false;
+            }
+
+            // 2bis - Calibrate pose
+            if (calibrate)
+            {
+                ok = this->calibratePose();
+            }
+
+            if (!ok)
+            {
+                yInfo() << "step_demo: could not calibrate the pose";
+                return false;
+            }
         }
 
-        // 2 - Compute the superquadric and grasping pose
-        ok = this->compute_superq_and_pose("hanging_tool", hand);
 
-        if (!ok || grasp_res_hand1.grasp_poses.size()==0)
-        {
-            yInfo() << "step_demo: could not compute superq or pose";
-            return false;
-        }
-
-        // 2bis - Calibrate pose
-        if (calibrate)
-        {
-            ok = this->calibratePose();
-        }
-
-        if (!ok)
-        {
-            yInfo() << "step_demo: could not calibrate the pose";
-            return false;
-        }
 
         // 3 - grasp the object and execute trajectory
 
