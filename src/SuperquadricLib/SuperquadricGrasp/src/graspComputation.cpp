@@ -592,6 +592,9 @@ void graspComputation::configure(GraspParams &g_params)
     // Set plane
     plane = g_params.pl;
 
+    // Set weights
+    solution_weights = g_params.weights;
+
     g.resize(5 + max_superq - 1);
 }
 
@@ -651,8 +654,8 @@ void graspComputation::finalize_solution(Ipopt::SolverReturn status, Ipopt::Inde
     // Change
     //double w1 = 0.01;
     //double w2 = 1e-5;
-    double w1 = 0.01;
-    double w2 = 4;
+    double w1 = solution_weights(0);
+    double w2 = solution_weights(1);
     double final_obstacles_value_average = 0.0;
 
     if (num_superq > 0.0)
@@ -922,6 +925,8 @@ GraspEstimatorApp::GraspEstimatorApp()
     hand.setSuperqParams(hand_vector);
     g_params.hand_superq = hand;
 
+    g_params.weights << 0.01, 4.0, 2.0, 2.0;
+
 }
 
 /*****************************************************************/
@@ -1090,28 +1095,30 @@ void GraspEstimatorApp::refinePoseCost(GraspResults &grasp_res)
 
           // double error_orientation = (orientation_error_vector.axis()).norm() * fabs(sin(orientation_error_vector.angle()));
 
-	  cout << " error orientation " << error_orientation << endl;
+            cout << " error orientation " << error_orientation << endl;
 
-          double w1 = 2;
+          double w1 = g_params.weights(2);
           //double w2 = 0.01;
-          double w2 = 2;
-		
-	  if (error_position > 0.01)
+          double w2 = g_params.weights(3);
+
+          if (error_position > 0.01)
           {
               w2 = 0.01;
               w1 = 10;
           }
 
-	  if (x_d(2) < 0.2)
-	  {
-	      w1 = 0.0;
-	  }
+          if (x_d(2) < 0.2)
+          {
+              cout << "x_d(2) is " << x_d(2) << " weights to zero" << endl;
+              w1 = 0.0;
+              w2 = 0.0;
+          }
 
           //if (error_orientation < 1.2)
           //    w2 = 0.0;
 
           poses_computed[i].cost += w1 * error_position + w2 * error_orientation;
-        }
+      }
     }
 
      grasp_res.best_pose = 0;
@@ -1157,6 +1164,13 @@ bool GraspEstimatorApp::setVector(const string &tag, const VectorXd &value)
         g_params.disp = value;
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Displacement set                                     : " << g_params.disp.format(CommaInitFmt) <<endl;
+        cout << "|| ---------------------------------------------------- ||" << endl << endl;
+    }
+    else if (tag == "weights" && value.rows() == 4 && value.cols() == 1)
+    {
+        g_params.weights = value;
+        cout << "|| ---------------------------------------------------- ||" << endl;
+        cout << "|| Weights set                                          : " << g_params.weights.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
     }
 }

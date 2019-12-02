@@ -128,4 +128,26 @@ struct PointD {
      list<double> get_hand_sq_params()
      bool set_hand_sq_params(1: list<double> values)
 
+     /**
+     * Set the weights used to compute grasp pose solution
+     * @param values: 4 values corresponding to weights for:
+     * values[0] --> final_F_value
+     * values[1] --> obstacle value
+     * values[2] --> position error
+     * values[3] --> rotation error
+     *@return true/false on success/failure.
+     */
+     list<double> get_grasp_solution_weights()
+
+     /**
+     * Set the weights used to compute grasp pose solution
+     * @param values: 4 values corresponding to weights for:
+     * values[0] --> final_F_value
+     * values[1] --> obstacle value
+     * values[2] --> position error
+     * values[3] --> rotation error
+     *@return true/false on success/failure.
+     */
+     bool set_grasp_solution_weights(1: list<double> values)
+
  }

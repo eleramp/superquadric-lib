@@ -54,6 +54,9 @@ protected:
     /* vector containing the hand ellipsoid in final pose */
     Vector6d solution_vector;
 
+    /* weights used to compute solution*/
+    Eigen::Vector4d solution_weights;
+
     /* Cone axis for pose constraints */
     Eigen::Vector3d d_x, d_y, d_z;
     /* Cone apertures for constraints on orientation */

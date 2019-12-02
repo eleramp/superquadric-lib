@@ -86,6 +86,8 @@ struct GraspParams
     SuperqModel::Superquadric hand_superq;
     /* Superquadrics representing obstacles */
     std::vector<SuperqModel::Superquadric> object_superqs;
+    /* Solution weights */
+    Eigen::Vector4d weights;
 
 };
 

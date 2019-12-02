@@ -143,6 +143,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     map<string,double> sq_grasp_params;
     Eigen::Vector4d plane;
     Eigen::Vector3d displacement;
+    Eigen::Vector4d sol_weights;
     Eigen::VectorXd hand_superq_params;
     Eigen::MatrixXd bounds_right, bounds_left;
     Eigen::MatrixXd bounds_constr_right, bounds_constr_left;
@@ -169,6 +170,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     bool set_sq_grasp_param(const string &param_name, const double value);
     vector<double> get_hand_sq_params();
     bool set_hand_sq_params(const vector<double> &values);
+    vector<double> get_grasp_solution_weights();
+    bool set_grasp_solution_weights(const vector<double> &values);
     bool set_single_superq(const bool value);
     string get_superq_mode();
     std::vector<int> get_sfm_region();
@@ -525,6 +528,20 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
         grasp_estim.setVector("displacement", displacement);
 
+        // set solution weights
+        list = rf.find("sol_weights").asList();
+        if (list)
+        {
+            if (list->size() == 4)
+            {
+                for(int i = 0 ; i < 4 ; i++) sol_weights(i) = list->get(i).asDouble();
+            }
+        }
+        else
+            sol_weights << 0.01, 2, 1, 1;
+
+        grasp_estim.setVector("weights", sol_weights);
+
         // set hand_superq_params
         hand_superq_params.resize(11);
 
@@ -857,6 +874,25 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
     {
         hand_superq_params.resize(values.size());
         hand_superq_params = Eigen::VectorXd::Map(&values[0], hand_superq_params.size());
+        grasp_estim.setVector("hand", hand_superq_params);
+        return true;
+    }
+
+    /****************************************************************/
+    vector<double> SuperquadricPipelineDemo::get_grasp_solution_weights()
+    {
+        vector<double> output_vec;
+        output_vec.resize(sol_weights.size());
+        Eigen::Vector4d::Map(&output_vec[0], sol_weights.size()) = sol_weights;
+        return output_vec;
+    }
+
+    /****************************************************************/
+    bool SuperquadricPipelineDemo::set_grasp_solution_weights(const vector<double> &values)
+    {
+        sol_weights.resize(values.size());
+        sol_weights = Eigen::Vector4d::Map(&values[0], sol_weights.size());
+        grasp_estim.setVector("weights", sol_weights);
         return true;
     }
 
