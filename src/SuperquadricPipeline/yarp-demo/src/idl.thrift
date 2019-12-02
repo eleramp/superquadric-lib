@@ -130,7 +130,7 @@ struct PointD {
 
      /**
      * Set the weights used to compute grasp pose solution
-     * @param values: 4 values corresponding to weights for:
+     * @param values: vector of 4 values corresponding to weights for:
      * values[0] --> final_F_value
      * values[1] --> obstacle value
      * values[2] --> position error
@@ -141,11 +141,12 @@ struct PointD {
 
      /**
      * Set the weights used to compute grasp pose solution
-     * @param values: 4 values corresponding to weights for:
+     * @param values: vecotr of 4 values corresponding to weights for:
      * values[0] --> final_F_value
      * values[1] --> obstacle value
      * values[2] --> position error
      * values[3] --> rotation error
+     * usage example: set_grasp_solution_weights (0.1 2.0 1.0 2.0)
      *@return true/false on success/failure.
      */
      bool set_grasp_solution_weights(1: list<double> values)
