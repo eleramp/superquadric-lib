@@ -244,8 +244,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
 
         u_i = rf.check("u_i", Value(50)).asInt();
         v_i = rf.check("v_i", Value(20)).asInt();
-        u_f = rf.check("u_f", Value(280)).asInt();
-        v_f = rf.check("v_f", Value(190)).asInt();
+        u_f = rf.check("u_f", Value(240)).asInt();
+        v_f = rf.check("v_f", Value(180)).asInt();
 
         vis.setPosition(x,y);
         vis.setSize(w,h);
@@ -1043,6 +1043,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             }
 
             bool compute_pose = true;
+	    //int i = 0;
 
             while (compute_pose)
             {
@@ -1055,14 +1056,8 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
                 yInfo() << "step_demo: could not compute superq or pose";
                 return false;
             }
-            int flag;
-            cout << "computed pose is ok? ";
-            cin >> flag;
-            if (flag)
-                compute_pose = false;
-            }
 
-            // 2bis - Calibrate pose
+	    // 2bis - Calibrate pose
             if (calibrate)
             {
                 ok = this->calibratePose();
@@ -1073,6 +1068,15 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
                 yInfo() << "step_demo: could not calibrate the pose";
                 return false;
             }
+
+            int flag;
+            cout << "computed pose is ok? ";
+            cin >> flag;
+            if (flag)
+                compute_pose = false;
+            }
+	    
+	    //++i;
         }
 
 
@@ -1727,9 +1731,9 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         vector<vector<unsigned char>> acquired_colors;
 
         Bottle cmd_request;
-        Bottle cmd_reply;
+        Bottle cmd_reply_0; Bottle cmd_reply_1;
         cmd_request.clear();
-        cmd_reply.clear();
+        cmd_reply_0.clear(); cmd_reply_1.clear();
         cmd_request.addString("Points");
         Bottle pointsList;
 
@@ -1755,7 +1759,13 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             return false;
         }
 
-        if (!sfm_rpc.write(cmd_request, cmd_reply))
+        if (!sfm_rpc.write(cmd_request, cmd_reply_0))
+        {
+            yError() << " Problems in getting points from SFM ";
+            return false;
+        }
+
+        if (!sfm_rpc.write(cmd_request, cmd_reply_1))
         {
             yError() << " Problems in getting points from SFM ";
             return false;
@@ -1775,14 +1785,21 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
         // Create the point cloud
         yInfo() << "acquireFromSFM: create the point cloud ";
 
-        for (int p_i = 0; p_i < cmd_reply.size()/3 ; p_i ++)
+        for (int p_i = 0; p_i < cmd_reply_1.size()/3 ; p_i ++)
         {
             // Get 3D point
             Vector point(3,0.0);
+	    double x = cmd_reply_1.get(p_i*3).asDouble();
+	    double x_0 = cmd_reply_0.get(p_i*3).asDouble();
+	    //if((x-x_0)>0.001)
+	    //{
+	//	cout << "x-x_0 "<< x-x_0 << endl;
+            //    continue;
+	    //}
 
-            point[0] = cmd_reply.get(p_i*3).asDouble();
-            point[1] = cmd_reply.get(p_i*3 + 1).asDouble();
-            point[2] = cmd_reply.get(p_i*3 + 2).asDouble();
+            point[0] = cmd_reply_1.get(p_i*3).asDouble();
+            point[1] = cmd_reply_1.get(p_i*3 + 1).asDouble();
+            point[2] = cmd_reply_1.get(p_i*3 + 2).asDouble();
 
             if (norm(point) == 0.0 || (point[0] > -0.2) || (point[0] < -0.6) || (point[2] < -0.2))
             {
@@ -1822,6 +1839,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             // Visualize acquired point cloud
             cout << "vis.addPoints" << endl;
             vis.addPoints(point_cloud, false);
+            cout << "vis.addPoints done" << endl;
 
             return true;
         }
@@ -1838,7 +1856,7 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             return;
         }
 
-        double x_max = pc[0][0];
+        double x_max = -1000;
 
         vector<Vector> new_pc;
         vector<vector<unsigned char>> new_colors;
@@ -1850,8 +1868,12 @@ class SuperquadricPipelineDemo : public RFModule, SuperquadricPipelineDemo_IDL
             if (pc[i][0] > x_max)
                 x_max = pc[i][0];
         }
-	x_max = x_max + 0.05;
-        yDebug() << "X max: " << x_max;
+
+	yDebug() << "x_max selected " << x_max;
+	x_max = std::min(x_max+0.03, -0.2);
+	
+	
+        yDebug() << "new X max: " << x_max;
         yDebug() << "x_max - " << pc_filter_params["sfm_range"] << ":" << x_max - pc_filter_params["sfm_range"];
 
         // filter points out of range
