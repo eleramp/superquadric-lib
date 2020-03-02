@@ -112,12 +112,12 @@ void graspComputation::init(GraspParams &g_params)
     if (l_o_r == "right")
     {
         d_x(0) = -0.8; d_x(1) = -0.7; d_x(2) = -0.5;
-        d_y(0) = 0.0; d_y(1) = 0.7; d_y(2) = -0.7;
+        d_y(0) = 0.0; d_y(1) = 0; d_y(2) = -1;
     }
     else
     {
         d_x(0) = -0.8; d_x(1) = 0.7; d_x(2) = -0.5;
-        d_y(0) = 0.0; d_y(1) = -0.7; d_y(2) =-0.7;
+        d_y(0) = 0.0; d_y(1) = 0; d_y(2) = -1;
     }
 
     d_x = d_x/d_x.norm();
@@ -137,12 +137,12 @@ void graspComputation::init(GraspParams &g_params)
     {
         if (l_o_r == "right")
         {
-            d_x(0) = -0.7; d_x(1) = 0.0; d_x(2) = -0.7;
+            d_x(0) = -1; d_x(1) = 0.0; d_x(2) = 0;
             d_y(0) = 0.0; d_y(1) = 1.0; d_y(2) = 0.0;
         }
         else
         {
-            d_x(0) = -0.7; d_x(1) = 0.0; d_x(2) = -0.7;
+            d_x(0) = 1; d_x(1) = 0.0; d_x(2) = 0;
             d_y(0) = 0.0; d_y(1) = -1.0; d_y(2) = 0.0;
         }
 
@@ -436,8 +436,8 @@ bool graspComputation::eval_g(Ipopt::Index n, const Ipopt::Number *x, bool new_x
 
      if (l_o_r == "right")
      {
-        robotPose = x_tmp.segment(0,3)-hand(0)*z_hand;
-        robotPose = robotPose-hand(0)*x_hand;
+        robotPose = x_tmp.segment(0,3)-hand(2)*z_hand;
+        //robotPose = robotPose-hand(0)*x_hand;
      }
      else
      {
@@ -504,8 +504,8 @@ double graspComputation::G_v(const Vector6d &x, const int &i, Ipopt::Index m)
 
      if (l_o_r == "right")
      {
-        robotPose = x.segment(0,3)-hand(0)*z_hand;
-        robotPose = robotPose-hand(0)*x_hand;
+        robotPose = x.segment(0,3)-hand(2)*z_hand;
+        //robotPose = robotPose-hand(0)*x_hand;
      }
      else
      {
@@ -628,8 +628,8 @@ void graspComputation::finalize_solution(Ipopt::SolverReturn status, Ipopt::Inde
     robot_pose = solution_vector;
     if (l_o_r == "right")
     {
-      robot_pose.segment(0,3) = solution_vector.segment(0,3)-(hand(0)+displacement(2))*(H_x.col(2).segment(0,3));
-      robot_pose.segment(0,3) = robot_pose.segment(0,3)-(hand(0) + displacement(0))*(H_x.col(0).segment(0,3));
+      robot_pose.segment(0,3) = solution_vector.segment(0,3)-(hand(2)+displacement(2))*(H_x.col(2).segment(0,3));
+      //robot_pose.segment(0,3) = robot_pose.segment(0,3)-(hand(0) + displacement(0))*(H_x.col(0).segment(0,3));
       robot_pose.segment(0,3) = robot_pose.segment(0,3)-(displacement(1))*(H_x.col(1).segment(0,3));
     }
     else
