@@ -51,8 +51,8 @@ typedef Eigen::Matrix<double, 3, 2>  Matrix32d;
 %eigen_typemaps(Eigen::Matrix4d)
 
 %template(vector_Vector3d_Aligned) std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>;
-%template(deque_Vector3d) std::deque<Eigen::Vector3d>;
 %template(vector_deque_Vector3d) std::vector<std::deque<Eigen::Vector3d>>;
+%template(deque_Vector3d) std::deque<Eigen::Vector3d>;
 %template(deque_Vector11d) std::deque<Vector11d>;
 
 /* Parse the header file to generate wrappers */
