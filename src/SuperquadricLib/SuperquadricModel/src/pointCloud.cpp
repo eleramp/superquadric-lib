@@ -108,6 +108,8 @@ void PointCloud::deletePoints()
 {
     points.clear();
     points_for_vis.clear();
+
+	return;
 }
 
 /*********************************************/
@@ -219,8 +221,8 @@ Matrix3d PointCloud::getAxes()
     M(2,0) = M(0,2);
     M(2,1) = M(1,2);
 
-    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullU);
-    orientation = svd.matrixU();
+    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullV);
+    orientation = (svd.matrixV()*(svd.matrixU().transpose())).transpose();
 
     return orientation;
 }
@@ -267,6 +269,8 @@ void PointCloud::subSample(const int &desired_points, const bool &random)
     p_aux.clear();
 
     n_points = points.size();
+
+	return;
 }
 
 /*********************************************/
