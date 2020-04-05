@@ -83,7 +83,7 @@ void graspComputation::init(GraspParams &g_params)
 
             if (l_o_r == "right")
             {
-                if (point(0) + point(2) <= 0)
+                if (point(2) <= 0)
                 {
                     Vector4d point_tmp, point_tr;
                     point_tmp.segment(0,3) = point;
@@ -111,8 +111,8 @@ void graspComputation::init(GraspParams &g_params)
     // Configure cone parameters for orientation constraints
     if (l_o_r == "right")
     {
-        d_x(0) = -0.8; d_x(1) = -0.7; d_x(2) = -0.5;
-        d_y(0) = 0.0; d_y(1) = 0; d_y(2) = -1;
+        d_x(0) = -1; d_x(1) = 0.0; d_x(2) = 0.0;
+        d_y(0) = 0.0; d_y(1) = 0.7; d_y(2) = -0.7;
     }
     else
     {
