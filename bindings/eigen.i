@@ -203,6 +203,12 @@
   bool ConvertFromEigenToNumPyMatrix(PyObject** out, Eigen::MatrixBase<Derived>* in)
   {
     npy_intp dims[2] = {in->rows(), in->cols()};
+    if (in->cols() == 1)
+    {
+        dims[0] = 1;
+        dims[1] = in->rows();
+    }
+
     *out = PyArray_SimpleNew(2, dims, NumPyType<typename Derived::Scalar>());
     if (!out)
       return false;

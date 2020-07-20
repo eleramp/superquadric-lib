@@ -6,9 +6,6 @@ set(Python_ADDITIONAL_VERSIONS "3.6" CACHE STRING "Python to use for binding")
 find_package(PythonLibs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(VTK REQUIRED COMPONENTS vtksys vtkRenderingCore NO_MODULE)
-if(VTK_FOUND)
-	message(" --- VTK found ${VTK_DIR}")
-endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 

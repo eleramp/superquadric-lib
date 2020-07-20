@@ -58,7 +58,7 @@ public:
     /* Superquadric orienation expressed as rotation matrix */
     Eigen::Matrix3d axes;
 
-    //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /**
     * Constructor

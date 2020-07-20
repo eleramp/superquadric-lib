@@ -53,7 +53,7 @@ class Visualizer : public UpdateCommand
 protected:
 
     int size_points;
-    int height;
+    double height;
     int num_poses;
     bool closing;
     std::vector<double> backgroundColor;

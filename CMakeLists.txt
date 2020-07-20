@@ -119,13 +119,15 @@ elseif()
 	option(EXECUTABLE "Build also the executable" OFF)
 endif()
 
+option(ENABLE_BINDINGS "Enable swig bindings" OFF)
+
 option(YARP_EXE "Build the yarp executable" OFF)
 
 # We use
 # - InstallBasicPackageFiles (http://robotology.github.io/ycm/gh-pages/v0.8/module/InstallBasicPackageFiles.html)
 # - AddUninstallTarget (http://robotology.github.io/ycm/gh-pages/v0.8/module/AddUninstallTarget.html)
 # - AddInstallRPATHSupport (http://robotology.github.io/ycm/gh-pages/v0.8/module/AddInstallRPATHSupport.html)
-# from YCM. Files are under the cmake subdirectory.
+# from YCM. Files are under the cmake subdirectory.
 # See https://github.com/robotology/ycm/
 # If you don't want to ship these files with your code (recommended), you can
 # instead depend on YCM.
@@ -202,10 +204,10 @@ if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-option(ENABLE_BINDINGS "Enable swig bindings" ON)
-    if(ENABLE_BINDINGS)
-        add_subdirectory(bindings)
-    endif()
+
+if(ENABLE_BINDINGS)
+    add_subdirectory(bindings)
+endif()
 
 # Add targets related to doxygen documention generation
 add_subdirectory(doc)
