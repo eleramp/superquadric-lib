@@ -213,9 +213,9 @@
     if (!out)
       return false;
     typename Derived::Scalar* data = static_cast<typename Derived::Scalar*>(PyArray_DATA((PyArrayObject*) *out));
-    for (int i = 0; i != dims[0]; ++i)
-      for (int j = 0; j != dims[1]; ++j)
-        data[i*dims[1]+j] = in->coeff(i,j);
+    for (int i = 0; i != in->rows(); ++i)
+      for (int j = 0; j != in->cols(); ++j)
+        data[i*in->cols()+j] = in->coeff(i,j);
     return true;
   };
 
