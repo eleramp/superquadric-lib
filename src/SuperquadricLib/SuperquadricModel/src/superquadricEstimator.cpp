@@ -612,8 +612,8 @@ void SuperqEstimatorApp::splitPoints(node *leaf)
     M(2,0) = M(0,2);
     M(2,1) = M(1,2);
 
-    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullV);
-    Matrix3d orientation = (svd.matrixV()*(svd.matrixU().transpose())).transpose();
+    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullU);
+    Matrix3d orientation = svd.matrixU();
     Vector4d plane;
     plane.head(3) = orientation.col(2);
 

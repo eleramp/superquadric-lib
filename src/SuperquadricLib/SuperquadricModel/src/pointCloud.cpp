@@ -221,8 +221,8 @@ Matrix3d PointCloud::getAxes()
     M(2,0) = M(0,2);
     M(2,1) = M(1,2);
 
-    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullV);
-    orientation = (svd.matrixV()*(svd.matrixU().transpose())).transpose();
+    JacobiSVD<MatrixXd> svd(M, ComputeFullU | ComputeFullU);
+    orientation = svd.matrixU();
 
     return orientation;
 }
