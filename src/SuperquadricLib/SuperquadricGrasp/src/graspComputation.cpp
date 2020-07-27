@@ -162,7 +162,7 @@ void graspComputation::init(GraspParams &g_params)
 
     aux_objvalue = 0.0;
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -274,8 +274,8 @@ double graspComputation::F(const Ipopt::Number *x, deque<Vector3d> &points_on, b
      value *= object(0)*object(1)*object(2)/points_on.size();
 
      aux_objvalue = value;
-	
-	return value;
+
+     return value;
 }
 
 /****************************************************************/
@@ -597,8 +597,8 @@ void graspComputation::configure(GraspParams &g_params)
     plane = g_params.pl;
 
     g.resize(5 + max_superq - 1);
-	
-	return;
+
+    return;
 }
 
 /****************************************************************/
@@ -695,7 +695,7 @@ void graspComputation::finalize_solution(Ipopt::SolverReturn status, Ipopt::Inde
     points_on.clear();
     points_on = aux;
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -884,7 +884,7 @@ void graspComputation::alignPose(Matrix4d &final_H)
 
     final_H.block(0,0,3,3) = rot_x;
 
-	return;
+    return;
 }
 
 /*****************************************************************/
@@ -1115,7 +1115,8 @@ void GraspEstimatorApp::refinePoseCost(GraspResults &grasp_res)
         if (poses_computed[i].cost < poses_computed[grasp_res.best_pose].cost)
             grasp_res.best_pose = i;
      }
-	return;
+    
+    return;
 }
 
 /*****************************************************************/
@@ -1138,7 +1139,7 @@ bool GraspEstimatorApp::setVector(const string &tag, const VectorXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Hand set                                             : " << g_params.hand_superq.getSuperqParams().format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
 
     }
     else if (tag == "plane" && value.rows() == 4 && value.cols() == 1)
@@ -1147,7 +1148,7 @@ bool GraspEstimatorApp::setVector(const string &tag, const VectorXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Plane set                                            : " << g_params.pl.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
     else if (tag == "displacement" && value.rows() == 3 && value.cols() == 1)
     {
@@ -1155,9 +1156,9 @@ bool GraspEstimatorApp::setVector(const string &tag, const VectorXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Displacement set                                     : " << g_params.disp.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
-	return false;
+    return false;
 }
 
 /*****************************************************************/
@@ -1172,7 +1173,7 @@ bool GraspEstimatorApp::setMatrix(const string &tag, const MatrixXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Bounds right set                                     : " << g_params.bounds_right.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
     else if (tag == "bounds_left" && value.rows() == 6 && value.cols() == 2)
     {
@@ -1181,7 +1182,7 @@ bool GraspEstimatorApp::setMatrix(const string &tag, const MatrixXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Bounds left set                                      : " << g_params.bounds_left.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
     else if (tag == "bounds_constr_right" && value.rows() == 8 && value.cols() == 2)
     {
@@ -1190,7 +1191,7 @@ bool GraspEstimatorApp::setMatrix(const string &tag, const MatrixXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Bounds constraint right set                          : " << g_params.bounds_constr_right.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
     else if (tag == "bounds_constr_left" && value.rows() == 8 && value.cols() == 2)
     {
@@ -1199,7 +1200,7 @@ bool GraspEstimatorApp::setMatrix(const string &tag, const MatrixXd &value)
         cout << "|| ---------------------------------------------------- ||" << endl;
         cout << "|| Bounds constraint left set                           : " << g_params.bounds_constr_left.format(CommaInitFmt) <<endl;
         cout << "|| ---------------------------------------------------- ||" << endl << endl;
-		return true;
+	return true;
     }
-	return false;
+    return false;
 }

@@ -36,7 +36,7 @@ void SuperqEstimator::init()
     points_downsampled.deletePoints();
     aux_objvalue = 0.0;
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -56,8 +56,8 @@ void SuperqEstimator::setPoints(PointCloud &point_cloud, const int &optimizer_po
     x0.setZero();
     // Compute initial estimate of superquadric
     computeX0(x0, point_cloud);
-	
-	return;
+
+    return;
 }
 
 /****************************************************************/
@@ -88,8 +88,8 @@ void SuperqEstimator::computeX0(Vector11d &x0, PointCloud &point_cloud)
     x0(5) = barycenter(0);
     x0(6) = barycenter(1);
     x0(7) = barycenter(2);
-	
-	return;
+
+    return;
 }
 
 /****************************************************************/
@@ -130,7 +130,7 @@ void SuperqEstimator::computeBounds()
     bounds(9,1)  = M_PI;
     bounds(10,1) = 2*M_PI;
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -188,7 +188,7 @@ void SuperqEstimator::F(const Ipopt::Number *x, bool &new_x)
          aux_objvalue = value;
     }
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -326,7 +326,7 @@ void SuperqEstimator::configure(const string &object_class)
       bounds(4,1) = 1.;
     }
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -344,7 +344,7 @@ void SuperqEstimator::finalize_solution(Ipopt::SolverReturn status, Ipopt::Index
 
     solution.setSuperqParams(params_sol);
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -523,7 +523,7 @@ void SuperqEstimatorApp::iterativeModeling(PointCloud &point_cloud)
 
     computeNestedSuperq(superq_tree->root);
 
-	return;
+    return;
 }
 
 /***********************************************************************/
@@ -566,7 +566,7 @@ void SuperqEstimatorApp::computeNestedSuperq(node *newnode)
         computeNestedSuperq(newnode->right);
     }
 
-	return;
+    return;
 }
 
 /***********************************************************************/
@@ -643,7 +643,7 @@ void SuperqEstimatorApp::splitPoints(node *leaf)
     cout << "|| Number of points in point cloud left                 :  " << point_cloud_split2->getNumberPoints() << endl;
     cout << "|| ---------------------------------------------------- ||" << endl << endl << endl;
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -653,7 +653,7 @@ void SuperqEstimatorApp::computeSuperqAxis(node *node)
     node->axis_y = node->superq.getSuperqAxes().col(1);
     node->axis_z = node->superq.getSuperqAxes().col(2);
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -922,7 +922,7 @@ void SuperqEstimatorApp::computeEdges(node *node, deque<Vector3d> &edges)
     point = node->superq.getSuperqCenter() - node->superq.getSuperqDims()(2) * node->axis_z;
     edges.push_back(point);
 
-	return;
+    return;
 }
 
 /***********************************************************************/
@@ -948,7 +948,7 @@ void SuperqEstimatorApp::copySuperqChildren(node *old_node, node *newnode)
 
     superq_tree_new->insert(node_c2, node_c1, newnode);
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -1228,7 +1228,7 @@ void SuperqEstimatorApp::superqUsingPlane(node *old_node, PointCloud *points, no
 
     superq_tree_new->insert(node_c1, node_c2, newnode);
 
-	return;
+    return;
 }
 
 /****************************************************************/
@@ -1281,5 +1281,5 @@ void SuperqEstimatorApp::addSuperqs(node *leaf, vector<Superquadric> &superqs)
         }
     }
 
-	return;
+    return;
 }
