@@ -53,7 +53,7 @@ points = sb.deque_Vector3d()
 colors = sb.vector_vector_uchar()
 
 # Suppose the pointcloud is a list of numpy arrays (floats):
-pc = [[0.1, 0.3, 0.4], ...]
+pc = [np.array([0.1, 0.3, 0.4]), ...]
 
 # Suppose the colors are a list of ints:
 cl = [[0, 255, 255], ...]
